@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="356.324" height="327.834" viewBox="0 0 356.324 327.834">
+  <g id="그룹_589" data-name="그룹 589" transform="matrix(0.966, -0.259, 0.259, 0.966, 5110.811, 13052.828)">
+    <g id="그룹_587" data-name="그룹 587" transform="translate(-1550 -13891.5)">
+      <g id="타원_208" data-name="타원 208" transform="translate(0 207.734)" fill="none" stroke="#000" stroke-width="20">
+        <circle cx="47.28" cy="47.28" r="47.28" stroke="none"/>
+        <circle cx="47.28" cy="47.28" r="32.28" fill="none"/>
+      </g>
+      <line id="선_12" data-name="선 12" x2="175.806" transform="translate(86.816 255.15)" fill="none" stroke="#000" stroke-linecap="round" stroke-width="25"/>
+      <line id="선_13" data-name="선 13" y1="215.75" transform="translate(47.416)" fill="none" stroke="#000" stroke-width="25"/>
+      <line id="선_14" data-name="선 14" x1="47.28" transform="translate(0.136)" fill="none" stroke="#000" stroke-linecap="round" stroke-width="25"/>
+      <g id="그룹_585" data-name="그룹 585" transform="translate(38.981 137.086)">
+        <g id="패스_233" data-name="패스 233" transform="translate(31.544)" fill="none">
+          <path d="M-22.972,0H180.007V117.929H15.115L.4,102.443l-11.484-8.254s-7.584-.363-17.225-16.867S-22.972,0-22.972,0Z" stroke="none"/>
+          <path d="M -10.984619140625 14.99998474121094 C -16.06282043457031 39.60214996337891 -18.151611328125 64.02824401855469 -15.3560791015625 69.75593566894531 C -11.83827209472656 75.77730560302734 -9.145904541015625 78.35643005371094 -7.923797607421875 79.32329559326172 L -5.931777954101562 79.41868591308594 L 10.30262756347656 91.08702087402344 L 21.55370330810547 102.9288558959961 L 165.0065460205078 102.9288558959961 L 165.0065460205078 14.99998474121094 L -10.984619140625 14.99998474121094 M -22.97236633300781 -1.52587890625e-05 L 180.0065460205078 -1.52587890625e-05 L 180.0065460205078 117.9288558959961 L 15.11450958251953 117.9288558959961 L 0.4011688232421875 102.4429016113281 L -11.08236694335938 94.18923187255859 C -11.08236694335938 94.18923187255859 -18.66603088378906 93.82606506347656 -28.3077392578125 77.32260131835938 C -37.94944763183594 60.81919097900391 -22.97236633300781 -1.52587890625e-05 -22.97236633300781 -1.52587890625e-05 Z" stroke="none" fill="#000"/>
+        </g>
+        <line id="선_15" data-name="선 15" x2="77.17" transform="translate(71.476 36.819)" fill="none" stroke="#000" stroke-linecap="round" stroke-width="30"/>
+        <line id="선_16" data-name="선 16" x2="74.725" y2="0.815" transform="translate(72.698 36.004)" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="15"/>
+      </g>
+      <g id="그룹_586" data-name="그룹 586" transform="translate(47.552 30.026)">
+        <g id="사각형_626" data-name="사각형 626" transform="translate(0 0)" fill="none" stroke="#000" stroke-width="15">
+          <rect width="202.979" height="117.929" stroke="none"/>
+          <rect x="7.5" y="7.5" width="187.979" height="102.929" fill="none"/>
+        </g>
+        <line id="선_15-2" data-name="선 15" x2="77.17" transform="translate(62.904 36.819)" fill="none" stroke="#000" stroke-linecap="round" stroke-width="30"/>
+        <line id="선_16-2" data-name="선 16" x2="74.725" y2="0.815" transform="translate(64.127 36.004)" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="15"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="972" height="972" viewBox="0 0 972 972">
+  <g id="그룹_576" data-name="그룹 576" transform="translate(5611.5 -5012.674)">
+    <circle id="타원_169" data-name="타원 169" cx="486" cy="486" r="486" transform="translate(-5611.5 5012.674)" fill="#58b3e3"/>
+    <circle id="타원_170" data-name="타원 170" cx="395" cy="395" r="395" transform="translate(-5520.5 5103.674)" fill="#63b7e2"/>
+    <circle id="타원_171" data-name="타원 171" cx="288.5" cy="288.5" r="288.5" transform="translate(-5414.5 5211.674)" fill="#79c1e6"/>
+    <g id="타원_172" data-name="타원 172" transform="translate(-5320.5 5305.674)" fill="#fff" stroke="#707070" stroke-width="1">
+      <circle cx="200" cy="200" r="200" stroke="none"/>
+      <circle cx="200" cy="200" r="199.5" fill="none"/>
+    </g>
+    <path id="Icon_material-bluetooth-searching" data-name="Icon material-bluetooth-searching" d="M124.724,115.573l24.815,26.091a75.655,75.655,0,0,0,4.706-26.2,76.873,76.873,0,0,0-4.6-25.978Zm56.582-59.6-13.477,14.17a101.386,101.386,0,0,1,10.482,45.209,102.474,102.474,0,0,1-10.482,45.209l12.835,13.5a115.986,115.986,0,0,0,16.472-59.717,117.107,117.107,0,0,0-15.83-58.367ZM140.447,67.215,79.373,3h-10.7V88.358l-49.1-51.62L4.5,52.6l59.791,62.866L4.5,178.327l15.081,15.857,49.1-51.62v85.358h10.7l61.075-64.215L94.454,115.461l45.993-48.246ZM90.069,46.073l20.109,21.143L90.069,88.358Zm20.109,117.634L90.069,184.849V142.564Z" transform="translate(-5221.318 5390.213)" fill="#83bde8"/>
+  </g>
+</svg>
