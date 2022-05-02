@@ -12,13 +12,6 @@ import { inject, observer } from 'mobx-react'
 
 
 const MoldMoveDialog = (props: { modalVisible: boolean, SendDailogState: any }): React.ReactElement => {
-    // const rackinfoData:any = null
-    // useEffect(() => {
-
-    //     rackinfoData = 
-    // },[])
-
-
     const onPressOk = (isVisible: boolean) => {
         props.SendDailogState(isVisible);
     };

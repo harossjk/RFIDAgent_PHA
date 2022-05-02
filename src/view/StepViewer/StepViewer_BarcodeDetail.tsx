@@ -64,8 +64,9 @@ const GetBarcodeData = (props: { navigation: any; setVisible: any }) => {
             let today = moment().format('yyyyMMDD');
             const isInAbleData: any = stores.MoldStore.getMoldinAbleData;
 
-            console.log("위치 RACK 인지 사출기 인지 ?:", serachBarcode[0]);
-            //사출기 바코드 생각하기 
+            await stores.MoldStore.rackPosition(isInAbleData[0].factoryCode, isInAbleData[0].rfid);
+            const rackpos = stores.MoldStore.getRackPostion;
+
             let tempMoldInData: any = {
               dt: isInAbleData[0].dt,
               seq: isInAbleData[0].seq,
@@ -82,13 +83,15 @@ const GetBarcodeData = (props: { navigation: any; setVisible: any }) => {
               inTime: new Date(),
               moldName: isInAbleData[0].moldName,
               position: serachBarcode[0].rackCode,
-              positionName: isInAbleData[0].positionName,
+              positionName: rackpos.positionDetailName,
               returnValue: null,
               rfid: isInAbleData[0].rfid,
               totalCount: isInAbleData[0].totalCount,
             }
             stores.MoldStore.addMoldIn(tempMoldInData);
           }
+
+          const rackpos = stores.MoldStore.getRackPostion;
 
           if (stores.RFIDStore.getScanData.length > 1) {
             console.log("진입?",);
@@ -100,7 +103,8 @@ const GetBarcodeData = (props: { navigation: any; setVisible: any }) => {
               stores.RFIDStore.setTagDataClear();
               props.setVisible(false);
               stores.MoldStore.SetMoldModalVisible(true);
-              stores.MoldStore.SetRackinfo(stores.RFIDStore.getSelectedData[0].value, "( " + serachBarcode[0].locationName + ' ) ' + serachBarcode[0].barcode);
+              stores.MoldStore.SetRackinfo(stores.RFIDStore.getSelectedData[0].value, "( " + rackpos.gubunName + " : " + rackpos.positionName + ' ) ' + rackpos.positionDetailName);
+
               setTimeout(() => {
                 stores.MoldStore.SetMoldModalVisible(false);
                 props.navigation.navigate('DrawerHome');

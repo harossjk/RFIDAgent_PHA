@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { makeObservable, observable, action, runInAction, computed } from 'mobx';
 import { baseURL } from '../components/Sever/Sever';
-import { useCallbackHandler } from '../stores/useCallbackHandler'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const urls = {
@@ -20,7 +19,8 @@ export const urls = {
   moldOutList: `${baseURL}/moldout/`, //get
 
   rackList: `${baseURL}/rack/barcode`,
-  login: `${baseURL}/user/login`
+  login: `${baseURL}/user/login`,
+  rackSearch: `${baseURL}/mold/position`,
 };
 
 export interface MoldMasterEntitiy {
@@ -150,6 +150,7 @@ class MoldInStore {
   moldOutTempData: MoldOutEntry = {};
 
   searchBarcodeData: any = {};
+  serachRackPostion: any = {};
 
   isMoldal: boolean = false;
 
@@ -167,6 +168,7 @@ class MoldInStore {
       moldOutAbleData: observable,
       moldOutDataList: observable,
       searchBarcodeData: observable,
+      serachRackPostion: observable,
 
       isMoldal: observable,
       rackinfo: observable,
@@ -181,6 +183,7 @@ class MoldInStore {
       addMoldOut: action,
       searchMoldOutList: action,
       rackList: action,
+      rackPosition: action,
 
       //set
       SetMoldInData: action,
@@ -201,6 +204,7 @@ class MoldInStore {
       getBarcodeData: computed,
       getModalStatuse: computed,
       getRackinfo: computed,
+      getRackPostion: computed
     });
   }
 
@@ -208,6 +212,9 @@ class MoldInStore {
     runInAction(() => {
       this.rackinfo.id = id;
       this.rackinfo.pos = pos;
+
+      console.log("this.rackinfo", this.rackinfo);
+
     })
   }
 
@@ -351,6 +358,25 @@ class MoldInStore {
       return await bOk;
     }
     return await bOk;
+  }
+
+  async rackPosition(factoryCode: string, rfid: string) {
+    try {
+      const response = await axios.get(urls.rackSearch, {
+        params: { factoryCode: factoryCode, moldRfid: rfid }
+      });
+
+      runInAction(() => {
+        this.serachRackPostion = response.data;
+        console.log("rackPosition", response.data);
+      })
+    }
+    catch (err) {
+      console.log("rackPosition", err);
+    }
+  }
+  get getRackPostion() {
+    return this.serachRackPostion
   }
 
   //입고가 가능한 금형 리스트

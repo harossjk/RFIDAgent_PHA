@@ -16,6 +16,8 @@ target 'RFIDAguent' do
 
   pod 'RNSVG', :path => '../node_modules/react-native-svg'
 
+  pod 'react-native-tcp-socket', :path => '../node_modules/react-native-tcp-socket'
+
   target 'RFIDAguentTests' do
     inherit! :complete
     # Pods for testing

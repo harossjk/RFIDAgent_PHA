@@ -224,22 +224,19 @@ const ObserverMoldItemOne = observer(MoldItemOne);
 
 const Mold_Article = ({ navigation }: { navigation: any }) => {
   async function initData() {
-    let ableData: any = await stores.MoldStore.getMoldinAbleData;
+    let ableData: any = stores.MoldStore.getMoldinAbleData;
     console.log(ableData);
 
     let today = moment().format('yyyyMMDD');
 
-    await stores.MoldStore.SetMoldInData('corpCode', ableData[0]['corpCode']);
-    await stores.MoldStore.SetMoldInData(
-      'factoryCode',
-      ableData[0]['factoryCode'],
-    );
-    await stores.MoldStore.SetMoldInData('rfid', ableData[0]['rfid']);
-    await stores.MoldStore.SetMoldInData('state', ableData[0]['state']);
-    await stores.MoldStore.SetMoldInData('dt', ableData[0]['dt']);
-    await stores.MoldStore.SetMoldInData('inDt', today);
-    await stores.MoldStore.SetMoldInData('seq', ableData[0]['seq']);
-    await stores.MoldStore.SetMoldInData(
+    stores.MoldStore.SetMoldInData(ableData[0]['corpCode']);
+    stores.MoldStore.SetMoldInData(ableData[0]['factoryCode']);
+    stores.MoldStore.SetMoldInData(ableData[0]['rfid']);
+    stores.MoldStore.SetMoldInData(ableData[0]['state']);
+    stores.MoldStore.SetMoldInData(ableData[0]['dt']);
+    //stores.MoldStore.SetMoldInData(today);
+    stores.MoldStore.SetMoldInData(ableData[0]['seq']);
+    stores.MoldStore.SetMoldInData(
       'createUserId',
       ableData[0]['createUserId'],
     );

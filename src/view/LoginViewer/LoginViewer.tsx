@@ -1,7 +1,7 @@
-import React, {useRef} from 'react';
-import {View, Text, Image} from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {Input, Button} from 'react-native-elements';
+import React, { useRef } from 'react';
+import { View, Text, Image } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { Input, Button } from 'react-native-elements';
 import loginStyles from './Login.module';
 
 const LoginViewer = ({
@@ -17,7 +17,7 @@ const LoginViewer = ({
 
   return (
     <KeyboardAwareScrollView
-      resetScrollToCoords={{x: 0, y: 0}}
+      resetScrollToCoords={{ x: 0, y: 0 }}
       contentContainerStyle={loginStyles.keyboardContainer}
       scrollEnabled={false}>
       <View style={loginStyles.imgContainer}>

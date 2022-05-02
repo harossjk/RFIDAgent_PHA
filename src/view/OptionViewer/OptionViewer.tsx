@@ -151,12 +151,16 @@ const RFIDConnectInfoViewer = () => {
 };
 
 const RFIDSettingViewer = () => {
+
+
+
   //popup visible control
   const [buzzerVisible, setBuzzerVisible] = useState<boolean>(false);
   const [radioVisible, setRadioVisible] = useState<boolean>(false);
 
   const [toggleVibrator, setToggleVibrator] = useState<boolean>(false);
   const [toggleReadMode, setToggleReadMode] = useState<boolean>(false);
+
 
   //jjk, 21.12.22
   function RequestDeviceConfig() {
@@ -326,27 +330,6 @@ const RFIDSettingViewer = () => {
             </View>
           </View>
         </TouchableOpacity>
-        {/* <View style={styles.rfidSettingcontainer}>
-          <DeviceResetSvg
-            fill={'#000'}
-            style={styles.deviceSettingSvgs}
-            height={25}
-            width={25}
-          />
-          <View style={styles.rectangleLayoutcontainer}>
-            <Text style={styles.lbLefttitle}>Reset RFID Setting</Text>
-            <Button
-              buttonStyle={styles.btnApplyStype}
-              titleStyle={{
-                fontSize: 12,
-                fontFamily: 'NanumSquareB',
-              }}
-              type="solid"
-              title="Apply"
-              onPress={onApplay}
-            />
-          </View>
-        </View> */}
       </View>
     </View>
   );
