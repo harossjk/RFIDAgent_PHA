@@ -3,16 +3,10 @@ import { View, Text, Image } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Input, Button } from 'react-native-elements';
 import loginStyles from './Login.module';
-
-const LoginViewer = ({
-  info,
-  onBtnInput,
-  onChangeText,
-}: {
-  info: any;
-  onBtnInput: any;
-  onChangeText: any;
-}) => {
+import stores from '../../stores';
+//props: { navigation: any; setVisible: any }
+//const LoginViewer = ({info,onBtnInput,onChangeText,}: {info: any;onBtnInput: any;onChangeText: any;}) => {
+const LoginViewer = (props: { info: any; onBtnInput: any; onChangeText: any; }) => {
   const ref_input2: any = useRef();
 
   return (
@@ -40,10 +34,10 @@ const LoginViewer = ({
             borderBottomWidth: 2,
           }}
           onChangeText={(IdValue: any) => {
-            onChangeText('id', IdValue);
+            props.onChangeText('id', IdValue);
           }}
           placeholderTextColor={'#C6C6C7'}
-          value={info.Id}
+          value={props.info.Id}
           returnKeyType="next"
           autoFocus={false}
           onSubmitEditing={() => ref_input2.current.focus()}
@@ -55,9 +49,9 @@ const LoginViewer = ({
             borderBottomColor: '#428BCA',
             borderBottomWidth: 2,
           }}
-          value={info.Pw}
+          value={props.info.Pw}
           onChangeText={(pwValue: any) => {
-            onChangeText('pw', pwValue);
+            props.onChangeText('pw', pwValue);
           }}
           placeholderTextColor={'#C6C6C7'}
           ref={ref_input2}
@@ -70,7 +64,7 @@ const LoginViewer = ({
           titleStyle={loginStyles.btntitleStyle}
           type="solid"
           title="로그인"
-          onPress={onBtnInput}
+          onPress={props.onBtnInput}
         />
       </View>
       <View style={loginStyles.commpanyContainer}>

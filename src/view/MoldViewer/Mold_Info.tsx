@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,14 +15,19 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import stores from '../../stores';
-import { observer } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 import { Avatar, Title, Caption, Colors } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { Icon } from 'react-native-elements';
 import { TAG_HAD_NUMBER } from '../../components/DeviceObject';
 import ProgressBar from '../../components/Progress/ProgressBar';
+import { toJS } from 'mobx';
 
-const MoldItemOne = ({ navigation }: any) => {
+const MoldItemOne = (props: { converInAble: any; }) => {
+  //jjk, 22.05.23 입고가 가능한 목록 조회 추가 
+
+
+
 
   // const onMoldIn = () => {
   //   let bOK = 0;
@@ -119,7 +124,7 @@ const MoldItemOne = ({ navigation }: any) => {
           <Text style={styles.lbLeftTitle}>
             금{'    '}형{'   '}명
           </Text>
-          <Text style={[styles.lbValue, { left: 45 }]}>
+          <Text numberOfLines={3} ellipsizeMode="tail" style={[styles.lbValue, { textAlign: 'left', width: 180, left: 45 }]}>
             {stores.MoldStore.getMoldMasterData[0] !== undefined ||
               stores.MoldStore.getMoldMasterData[0] !== null
               ? stores.MoldStore.getMoldMasterData[0].moldName
@@ -148,13 +153,28 @@ const MoldItemOne = ({ navigation }: any) => {
               : 'NONE'}
           </Text> */}
         </View>
+        {/* <View style={[styles.moldItemRact]}>
+          <Text style={styles.lbLeftTitle}>보 관 위 치</Text>
+          <Text style={[styles.lbValue, { left: 48, color: 'red' }]}>
+            {converInAble[0] !== undefined ||
+              converInAble[0] !== null
+              ? converInAble[0].positionDetailName 
+              : 'NONE'}
+          </Text>
+        </View> */}
         <View style={[styles.moldItemRact]}>
           <Text style={styles.lbLeftTitle}>보 관 위 치</Text>
           <Text style={[styles.lbValue, { left: 48, color: 'red' }]}>
-            {stores.MoldStore.getMoldMasterData[0] !== undefined ||
-              stores.MoldStore.getMoldMasterData[0] !== null
-              ? stores.MoldStore.getMoldMasterData[0].rack
-              : 'NONE'}
+            {
+              props.converInAble === undefined || props.converInAble === null ? "NONE" :
+                props.converInAble[0] === undefined || props.converInAble[0] === null ? "NONE" :
+                  props.converInAble[0].positionName === undefined || props.converInAble[0].positionName === null ? "NONE" : `[${props.converInAble[0].positionName}] `
+            }
+            {
+              props.converInAble === undefined || props.converInAble === null ? "NONE" :
+                props.converInAble[0] === undefined || props.converInAble[0] === null ? "NONE" :
+                  props.converInAble[0].positionDetailName === undefined || props.converInAble[0].positionDetailName === null ? "" : props.converInAble[0].positionDetailName
+            }
           </Text>
         </View>
         <View style={[styles.moldItemRact]}>
@@ -241,10 +261,20 @@ const MoldItemOne = ({ navigation }: any) => {
 
 const ObserverMoldItemOne = observer(MoldItemOne);
 const Mold_Info = (props: { navigation: any; pageinfo: string; }) => {
+  const [inAbleData, setInAbleData] = useState<any>();
+  useEffect(() => {
+    const setInAbleModeasync = async () => {
+      if (stores.MoldStore.getMoldinAbleData !== null || stores.MoldStore.getMoldinAbleData !== undefined)
+        setInAbleData(stores.MoldStore.getMoldinAbleData);
+    }
+    setInAbleModeasync();
 
+
+    console.log("result 확인 : ", inAbleData);
+
+  }, [])
 
   const isFocused = useIsFocused();
-
   React.useEffect(() => {
     if (isFocused) {
       const backAction = () => {
@@ -263,21 +293,15 @@ const Mold_Info = (props: { navigation: any; pageinfo: string; }) => {
         backHandler.remove();
       };
     }
-
-    console.log(stores.MoldStore.getMoldMasterData);
-
   }, [isFocused]);
-
-
 
   return (
     <>
       <View style={styles.container}>
-
         <Text style={{ textAlign: 'center', fontFamily: 'NanumSquareEB', color: '#808080', fontSize: 20, }}>
           금형정보
         </Text>
-        <ObserverMoldItemOne navigation={props.navigation} />
+        <ObserverMoldItemOne converInAble={inAbleData} />
       </View>
     </>
   );
@@ -361,4 +385,5 @@ const styles = StyleSheet.create({
     bottom: 8,
   },
 });
-export default Mold_Info;
+//export default Mold_Info;
+export default inject('navigation')(observer(Mold_Info));

@@ -74,7 +74,7 @@ class StepStore {
     }
   }
 
-  SetStepState(state: any) {
+  async SetStepState(state: any) {
     try {
       runInAction(() => {
         this.stepState = state;
@@ -84,14 +84,20 @@ class StepStore {
     }
   }
 
-  SetNoticeVisible(isVislbe: boolean) {
-    try {
-      runInAction(() => {
-        this.isNoticeVisible = isVislbe;
-      });
-    } catch (error) {
-      console.log('SetStepState', error);
-    }
+  async SetNoticeVisible(isVislbe: boolean): Promise<boolean> {
+    return new Promise(async (reslove, reject) => {
+      try {
+        runInAction(() => {
+          this.isNoticeVisible = isVislbe;
+          console.log("여기바 뀜?????????????????", this.isNoticeVisible);
+
+          reslove(this.isNoticeVisible)
+        });
+      } catch (error) {
+        console.log('SetStepState', error);
+        reject(error);
+      }
+    });
   }
 
   get getSelectedTagId(): number {

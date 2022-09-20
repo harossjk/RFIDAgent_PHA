@@ -1,12 +1,12 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Modal from 'react-native-modal';
-import {View, StyleSheet, Alert, BackHandler} from 'react-native';
+import { View, StyleSheet, Alert, BackHandler } from 'react-native';
 import RadioButtonGroup from '../RadioButton/RadioButtonGroup';
-import {Button} from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import stores from '../../stores';
 
-import {DeviceConfig} from '../DeviceObject';
+import { DeviceConfig } from '../DeviceObject';
 import AppSlider from '../../components/AppSlider';
 
 const RadioDialog = ({
@@ -43,7 +43,7 @@ const RadioDialog = ({
       onBackdropPress={() => {
         SendDailogState(false);
       }}
-      style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <View
         style={{
           flexDirection: 'column',

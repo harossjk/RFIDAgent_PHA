@@ -31,32 +31,16 @@ import { BuzzerDialog, RadioDialog } from '../../components/Dialog';
 import ToggleButton from '../../components/ToggleButton/ToggleButton';
 import { DeviceConfig } from '../../components/DeviceObject';
 import ProgressBar from '../../components/Progress/ProgressBar';
+import { useIsFocused } from '@react-navigation/native';
 
-function DisConnect() {
-  return new Promise<void>((resolve, reject) => {
-    stores.StepStore.SetNoticeVisible(true);
-    stores.RFIDStore.onDeviceDisConnect();
-    console.log('1.디바이스 연결해제');
-    stores.RFIDStore.SendDisRFIDHandler();
-    console.log('2.RFID 핸들러 연결해제');
-    stores.RFIDStore.SendDisBarcodeHandler();
-    console.log('3.Barcode 핸들러 연결해제');
-    stores.RFIDStore.VerifyConnect();
-    console.log('4.연결해제');
-    setTimeout(() => {
-      stores.StepStore.SetNoticeVisible(false);
-      resolve();
-    }, 5000);
-  });
-}
-
-const RFIDInfoViwer = ({ navigation }: { navigation: any }) => {
+const wait = (timeToDelay: any) => new Promise((resolve) => setTimeout(resolve, timeToDelay))
+const RFIDInfoViwer = (props: { onBluetoothConnect: any, onBluetoothDisconnet: any }) => {
   const onBluetoothConnect = () => {
-    navigation.navigate('DrawerBluetooth');
+    props.onBluetoothConnect();
   };
 
-  const onBluetoothDisconnet = async () => {
-    await DisConnect();
+  const onBluetoothDisconnet = () => {
+    props.onBluetoothDisconnet();
   };
 
   return (
@@ -150,10 +134,7 @@ const RFIDConnectInfoViewer = () => {
   );
 };
 
-const RFIDSettingViewer = () => {
-
-
-
+const RFIDSettingViewer = () => { // (props: { onSetVibrator: any; onSetReadMode: any }) => {
   //popup visible control
   const [buzzerVisible, setBuzzerVisible] = useState<boolean>(false);
   const [radioVisible, setRadioVisible] = useState<boolean>(false);
@@ -161,37 +142,43 @@ const RFIDSettingViewer = () => {
   const [toggleVibrator, setToggleVibrator] = useState<boolean>(false);
   const [toggleReadMode, setToggleReadMode] = useState<boolean>(false);
 
+  // props.onSetVibrator((result: any) => {
+  //   console.log("onSetVibrator", result);
 
-  //jjk, 21.12.22
-  function RequestDeviceConfig() {
-    return new Promise<void>((resolve, reject) => {
-      stores.RFIDStore.RequestDeviceConfig().then();
-      const isVibrator: boolean = Boolean(
-        stores.RFIDStore.getDeviceInfo['devVibState'],
-      );
-      const isReadMode: boolean =
-        stores.RFIDStore.getDeviceInfo['devContinue'] == 0;
+  //   setToggleVibrator(result);
+  // })
 
-      setTimeout(() => {
-        console.log(isVibrator, isReadMode);
+  // props.onSetReadMode((result: any) => {
+  //   console.log("onSetReadMode", result);
+  //   setToggleReadMode(result);
+  // })
 
-        setToggleVibrator(isVibrator);
-        setToggleReadMode(isReadMode);
+  React.useEffect(() => {
+    let isMount = true;
+    const GetDeviceOptions = async () => {
+      try {
+        if (stores.RFIDStore.isConnect) {
+          if (isMount) {
+            stores.StepStore.SetNoticeVisible(true);
+            await stores.RFIDStore.RequestDeviceConfig().then().catch();
+            setToggleVibrator(Boolean(stores.RFIDStore.getDeviceInfo.devVibState));
+            stores.RFIDStore.getDeviceInfo.devContinue == 1 ? setToggleReadMode(!Boolean(stores.RFIDStore.getDeviceInfo.devContinue)) : setToggleReadMode(Boolean(stores.RFIDStore.getDeviceInfo.devContinue));
+            stores.StepStore.SetNoticeVisible(false);
+            console.log("OptionViewer");
+          }
+        }
+      } catch (error) {
+        console.log("error", error);
+        stores.RFIDStore.SendToastMessage("디바이스 정보 불러오기 실패 다시시도해주세요.")
         stores.StepStore.SetNoticeVisible(false);
-        resolve();
-      }, 2000);
-    });
-  }
-  const RequestDeviceLogic = async () => {
-    const isConnect = stores.RFIDStore.isConnect;
-    if (isConnect) {
-      stores.StepStore.SetNoticeVisible(true);
-      await RequestDeviceConfig();
+      }
     }
-  };
+    GetDeviceOptions();
 
-  useEffect(() => {
-    RequestDeviceLogic();
+
+    return () => {
+      isMount = false;
+    };
   }, []);
 
   const onBuzzer = () => {
@@ -212,6 +199,8 @@ const RFIDSettingViewer = () => {
   };
 
   const setVibrator = () => {
+    if (!stores.RFIDStore.isConnect)
+      return;
     DeviceConfig.devVibState = Number(!toggleVibrator);
     stores.RFIDStore.setVibrator(DeviceConfig.devVibState);
     stores.RFIDStore.SendSetVibrator(DeviceConfig.devVibState);
@@ -226,7 +215,11 @@ const RFIDSettingViewer = () => {
   };
 
   const setReadMode = () => {
+    if (!stores.RFIDStore.isConnect)
+      return;
     DeviceConfig.devContinue = Number(toggleReadMode); // 0 이면 Continuous Read Mode , 1 이면 한번만 읽기
+    console.log("반응 ", DeviceConfig.devContinue);
+
     stores.RFIDStore.setReadMode(DeviceConfig.devContinue);
     stores.RFIDStore.SendSetReadMode(DeviceConfig.devContinue);
     setToggleReadMode(!toggleReadMode);
@@ -239,21 +232,18 @@ const RFIDSettingViewer = () => {
     setToggleReadMode(isOnOff);
   };
 
-  const onApplay = () => {
-    console.log('설정 초기화 ');
-  };
-
   return (
     <View>
+      <ObservedProgressBar visible={stores.StepStore.getNoticeVisible} />
       <View>
-        <ProgressBar visible={stores.StepStore.getNoticeVisible} />
         <Text style={styles.labelStyle}>RFID 설정</Text>
       </View>
       <View style={styles.viewContainer}>
-        <TouchableOpacity activeOpacity={0.5} onPress={() => onBuzzer()}>
+        <TouchableOpacity activeOpacity={0.5} onPress={() => onBuzzer()}
+          disabled={stores.RFIDStore.isConnect ? false : true}  >
           <View style={styles.rfidSettingcontainer}>
             <DeviceBeepVolumeSvg
-              fill={'#000'}
+              fill={stores.RFIDStore.isConnect ? '#000' : '#8A8A8A'}
               style={styles.deviceSettingSvgs}
               height={25}
               width={25}
@@ -277,10 +267,11 @@ const RFIDSettingViewer = () => {
             </View>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => setVibrator()}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => setVibrator()}
+          disabled={stores.RFIDStore.isConnect ? false : true}  >
           <View style={styles.rfidSettingcontainer}>
             <DeviceVibratorSvg
-              fill={'#000'}
+              fill={stores.RFIDStore.isConnect ? '#000' : '#8A8A8A'}
               style={styles.deviceSettingSvgs}
               height={25}
               width={25}
@@ -288,15 +279,16 @@ const RFIDSettingViewer = () => {
             <View style={styles.rectangleLayoutcontainer}>
               <Text style={styles.lbLefttitle}>Vibrator</Text>
               <View style={{ top: 5 }}>
-                <ToggleButton setToggle={toggleVibrator} getToggle={getVibrator} />
+                <ToggleButton isConnect={stores.RFIDStore.isConnect} setToggle={toggleVibrator} getToggle={getVibrator} />
               </View>
             </View>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => setReadMode()}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => setReadMode()}
+          disabled={stores.RFIDStore.isConnect ? false : true}  >
           <View style={styles.rfidSettingcontainer}>
             <ContinuousReadSvg
-              fill={'#000'}
+              fill={stores.RFIDStore.isConnect ? '#000' : '#8A8A8A'}
               style={styles.deviceSettingSvgs}
               height={25}
               width={25}
@@ -304,15 +296,16 @@ const RFIDSettingViewer = () => {
             <View style={styles.rectangleLayoutcontainer}>
               <Text style={styles.lbLefttitle}>Continuous Read Mode</Text>
               <View style={{ top: 5 }}>
-                <ToggleButton setToggle={toggleReadMode} getToggle={getReadMode} />
+                <ToggleButton isConnect={stores.RFIDStore.isConnect} setToggle={toggleReadMode} getToggle={getReadMode} />
               </View>
             </View>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.5} onPress={() => onRadio()}>
+        <TouchableOpacity activeOpacity={0.5} onPress={() => onRadio()}
+          disabled={stores.RFIDStore.isConnect ? false : true}  >
           <View style={styles.rfidSettingcontainer}>
             <DeviceRadioPowerSvg
-              fill={'#000'}
+              fill={stores.RFIDStore.isConnect ? '#000' : '#8A8A8A'}
               style={styles.deviceSettingSvgs}
               height={25}
               width={25}
@@ -338,13 +331,50 @@ const RFIDSettingViewer = () => {
 const ObservedRFIDInfo = observer(RFIDInfoViwer);
 const ObservedRFIDConnectInfo = observer(RFIDConnectInfoViewer);
 const ObservedRFIDSetting = observer(RFIDSettingViewer);
-
+const ObservedProgressBar = observer(ProgressBar);
 const OptionViewer = ({ navigation }: { navigation: any }) => {
+
+  const onBluetoothConnect = () => {
+    console.log("블루투스연결");
+    navigation.navigate('DrawerBluetooth');
+  }
+
+  const onBluetoothDisconnet = async () => {
+    console.log("블루투스해제");
+    try {
+      await stores.StepStore.SetNoticeVisible(true);
+      console.log("0.ProgressBar", stores.StepStore.getNoticeVisible);
+      await stores.RFIDStore.onDeviceDisConnect();
+      await wait(1000)
+
+      console.log('1.디바이스 연결해제');
+      await stores.RFIDStore.SendDisRFIDHandler();
+      await wait(1000)
+
+      console.log('2.RFID 핸들러 연결해제');
+      await stores.RFIDStore.SendDisBarcodeHandler();
+      await wait(1000)
+
+      console.log('3.Barcode 핸들러 연결해제');
+      await stores.RFIDStore.VerifyConnect();
+      await wait(1000)
+
+      console.log('4.연결해제');
+      await stores.StepStore.SetNoticeVisible(false);
+      await wait(1000)
+
+    } catch (error) {
+      console.log("onBluetoothDisconnet error : ", error);
+      await stores.StepStore.SetNoticeVisible(false);
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container}>
+
       <ScrollView style={{ flex: 1 }}>
         <View style={{ flex: 1, backgroundColor: '#F7F8FA' }}>
-          <ObservedRFIDInfo navigation={navigation} />
+          <ObservedRFIDInfo onBluetoothConnect={onBluetoothConnect} onBluetoothDisconnet={onBluetoothDisconnet} />
           <ObservedRFIDConnectInfo />
           <ObservedRFIDSetting />
         </View>
@@ -424,7 +454,7 @@ const styles = StyleSheet.create({
     borderTopStartRadius: 5,
     borderBottomStartRadius: 5,
     borderBottomEndRadius: 5,
-    backgroundColor: '#428BCA', //#428BCA
+    backgroundColor: '#428BCA',
     width: wp('22%'),
     height: 29,
   },
@@ -484,6 +514,7 @@ const styles = StyleSheet.create({
     top: 21,
     fontFamily: 'NanumSquareEB',
     fontSize: 15,
+    color: '#000'
   },
   lbRighttitle: {
     textAlign: 'right',
@@ -505,7 +536,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 16,
     left: 12,
-    backgroundColor: '#EEEEEE',
+
+    //backgroundColor: '#EEEEEE',
+    // backgroundColor: 'red',
+
+
   },
   radioStyle: {
     width: wp('50%'),

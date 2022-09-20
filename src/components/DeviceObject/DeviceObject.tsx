@@ -1,4 +1,4 @@
-interface DeviceObject {
+export interface DeviceObject {
   devName: string;
   devMacAdrr: string;
   devBuzzer: number;

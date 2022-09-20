@@ -38,6 +38,7 @@ import {
   Mold_Release,
   Mold_ArticleList,
   Mold_ReleaseList,
+  MoldSearch,
 } from '../view/MoldViewer';
 
 import stores from '../stores';
@@ -332,7 +333,7 @@ const MoldNavigator = ({ navigation }: any) => {
           ),
           headerShown: true,
         }}
-        component={MoldContainer}
+        component={MoldSearch}
       />
       <Stack.Screen
         name={AppScreens.stackMoldInfo}
@@ -347,14 +348,14 @@ const MoldNavigator = ({ navigation }: any) => {
           ),
           headerShown: true,
         }}
-        component={MoldContainer}
+        component={Mold_Info}
       />
     </Stack.Navigator>
   );
 };
 
 const ObservedRFIDNavigator = observer(RFIDNavigator);
-
+const ObservedMoldNavigator = observer(MoldNavigator);
 //Drawer add Navigation Page
 const DrawerNavigator = () => {
   return (
@@ -378,32 +379,11 @@ const DrawerNavigator = () => {
         return <CustomSidebarMenu {...filteredProps} />;
       }}>
       <Drawer.Screen name={AppScreens.drawerHome} component={HomekNavigator} />
-      <Drawer.Screen
-        name={AppScreens.drawerOption}
-        component={OptionNavigator}
-      />
-      <Drawer.Screen
-        name={AppScreens.drawerLogin}
-        options={DrawerOption.loginOption}
-        component={LoginNavigator}
-      />
-
-      <Drawer.Screen
-        name={AppScreens.drawerBluetooth}
-        component={BluetoothNavigator}
-      />
-
-      <Drawer.Screen
-        name={AppScreens.drawerRFID}
-        options={DrawerOption.loginOption}
-        component={ObservedRFIDNavigator}
-      />
-
-      <Drawer.Screen
-        name={AppScreens.drawerMold}
-        options={{ headerShown: false, swipeEnabled: true }}
-        component={MoldNavigator}
-      />
+      <Drawer.Screen name={AppScreens.drawerOption} component={OptionNavigator} />
+      <Drawer.Screen name={AppScreens.drawerLogin} options={DrawerOption.loginOption} component={LoginNavigator} />
+      <Drawer.Screen name={AppScreens.drawerBluetooth} component={BluetoothNavigator} />
+      <Drawer.Screen name={AppScreens.drawerRFID} options={DrawerOption.loginOption} component={ObservedRFIDNavigator} />
+      <Drawer.Screen name={AppScreens.drawerMold} options={{ headerShown: false, swipeEnabled: true }} component={ObservedMoldNavigator} />
 
       {/* <Drawer.Screen
         name={AppScreens.drawerMoldInfo}

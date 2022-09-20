@@ -109,8 +109,15 @@ class CScanHandler (private val reactContext: ReactApplicationContext, looper: L
         mScanManager!!.aDecodeGetResult(mDecodeResult!!.recycle())
         var barcodeType : String = mDecodeResult!!.symName
         var barcodeResult :String = mDecodeResult!!.toString()
+
+        //jjk, 22.05.23 - \n 이슈로 인하여 barcode중에 \n 가 있으면 삭제 처리
+        if(barcodeResult.contains("\n")){
+            barcodeResult = barcodeResult.replace("\n","");
+        }
+
         mapBarcodeDataS["type"] = barcodeType;
         mapBarcodeDataS["result"] = barcodeResult;
+
         parent!!.ReceiverBarcodeData(mapBarcodeDataS)
         Log.d(TAG,mapBarcodeDataS.toString())
     }

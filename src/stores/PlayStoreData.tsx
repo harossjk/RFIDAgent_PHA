@@ -1,4 +1,16 @@
 export let playStore: boolean = false;
+
+export enum MODE {
+    FM_MODE, // 정해진 시퀀스 대로 
+    AM_MODE  // 자유롭게 
+}
+
+//jjk, 22.09.05 - 나중에 변경될것 감안해서 MODE를 나눔 FM / AM 
+// 금형이동 시퀀스
+// 사출기 → 금형반 → 일상점검/정기점검/수리완료 → 금형렉 or 사출기 이동
+export let Custom_Mode: MODE = MODE.AM_MODE; //
+
+
 export const tag: any = {
     count: 0,
     id: 1,
@@ -6,6 +18,7 @@ export const tag: any = {
     moldName: undefined,
     value: "008869",
 }
+
 export const moldSelectOne: any = {
     cavity: 123,
     checksheetNo: "20220127000001",

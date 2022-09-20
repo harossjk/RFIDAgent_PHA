@@ -80,7 +80,7 @@ import com.android.build.OutputFile
  */
 
 project.ext.react = [
-    enableHermes: false  ,  // false clean and rebuild if changing
+    enableHermes: true  ,  // false clean and rebuild if changing
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
@@ -131,8 +131,8 @@ android {
         applicationId "com.rfidaguent"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 6 //여기 버전 바꿔서 올리기
-        versionName "1.0.6"
+        versionCode 9 //여기 버전 바꿔서 올리기//udmt1888!
+        versionName "1.0.9"
     }
     splits {
         abi {
@@ -204,6 +204,7 @@ dependencies {
 
     dependencies {
         implementation 'com.google.code.gson:gson:2.8.5'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
     }
 
     if (enableHermes) {

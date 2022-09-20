@@ -1,12 +1,14 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
+import { useEffect } from 'react';
 import SwitchToggle from 'react-native-switch-toggle';
 
-const ToggleButton = ({ setToggle, getToggle}:{setToggle:any, getToggle:any}) => {
+const ToggleButton = (props: { isConnect: boolean, setToggle: any, getToggle: any }) => {
 
   const onPressToggle = (isOnOff: boolean) => {
-    setToggle = isOnOff;
-    getToggle(setToggle);
+    props.setToggle = isOnOff;
+    props.getToggle(props.setToggle);
   };
+
 
   return (
     <SwitchToggle
@@ -19,7 +21,7 @@ const ToggleButton = ({ setToggle, getToggle}:{setToggle:any, getToggle:any}) =>
         backgroundColor: '#ccc',
         padding: 5,
       }}
-      
+
       circleStyle={{
         width: 20,
         height: 20,
@@ -27,11 +29,11 @@ const ToggleButton = ({ setToggle, getToggle}:{setToggle:any, getToggle:any}) =>
         backgroundColor: 'white',
       }}
 
-      switchOn={setToggle}
-      onPress={() => onPressToggle(!setToggle)}
+      switchOn={props.setToggle}
+      onPress={() => onPressToggle(!props.setToggle)}
       circleColorOff="#fff"
       circleColorOn="#fff"
-      backgroundColorOn="#2196f3"
+      backgroundColorOn={props.isConnect ? "#2196f3" : "#C4C4C4"}
       backgroundColorOff="#C4C4C4"
     />
   );

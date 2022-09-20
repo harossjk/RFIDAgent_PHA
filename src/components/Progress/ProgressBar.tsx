@@ -6,42 +6,18 @@ import {
   ActivityIndicator,
   StyleSheet,
   Button,
+  ColorValue,
 } from 'react-native';
 
-// const ProgressBar = ({visible}: {visible: boolean}) => (
-//   <Modal
-//     animationType="fade"
-//     transparent={true}
-//     onRequestClose={() => null}
-//     visible={visible}>
-//     <View
-//       style={{
-//         flex: 1,
-//         backgroundColor: 'transparent',
-//         alignItems: 'center',
-//         justifyContent: 'center',
-//       }}>
-//       <View
-//         style={{
-//           borderRadius: 10,
-//           backgroundColor: 'rgba(0, 0, 0, .5)',
-//           padding: 25,
-//         }}>
-//         <Text style={styles.title}>Please Wait</Text>
-//         <Text style={{fontSize: 20, fontWeight: '200'}}>Loading</Text>
-//         <ActivityIndicator size="large" color="#0000ff" />
-//       </View>
-//     </View>
-//   </Modal>
-// );
-const ProgressBar = ({visible}: {visible: boolean}) => (
-  <Modal visible={visible} animationType="fade" transparent={true}>
+
+const ProgressBar = (props: { visible: boolean, userColor?: ColorValue }) => (
+  <Modal visible={props.visible} animationType="fade" transparent={true}>
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Please Wait</Text>
         <View style={styles.loading}>
           <View style={styles.loader}>
-            <ActivityIndicator size="large" color={'red'} />
+            <ActivityIndicator size="large" color={props.userColor === undefined ? 'red' : props.userColor} />
           </View>
           <View style={styles.loadingContent}>
             <Text>Loading</Text>

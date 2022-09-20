@@ -19,14 +19,17 @@ import stores from './src/stores';
 
 
 const VerifyDevcie = () => {
+  const VerifConnect = async () => {
+    await stores.RFIDStore.VerifyConnect();
+    console.log("App", stores.RFIDStore.isConnect);
+    // if (stores.RFIDStore.isConnect) {
+    //   // await stores.RFIDStore.SendSetRFIDHandler();
+    //   // await stores.RFIDStore.RequestDeviceConfig();
+    // }
+  }
+
   React.useEffect(() => {
-    async function VerifConnect() {
-      await stores.RFIDStore.VerifyConnect();
-      // if (stores.RFIDStore.isConnect) {
-      //   // await stores.RFIDStore.SendSetRFIDHandler();
-      //   // await stores.RFIDStore.RequestDeviceConfig();
-      // }
-    }
+
     VerifConnect();
   }, []);
 
@@ -48,6 +51,7 @@ const App = () => {
   React.useEffect(() => {
     SplashScreen.hide();
   }, []);
+
 
   return <ObservedVerifyDevcie />;
 };

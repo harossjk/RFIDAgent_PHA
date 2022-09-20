@@ -1,11 +1,11 @@
-import React, {useRef} from 'react';
-import {Animated, Text, View, StyleSheet, SafeAreaView} from 'react-native';
+import React, { useRef } from 'react';
+import { Animated, Text, View, StyleSheet, SafeAreaView } from 'react-native';
 
 import BluetoothSearchSvg from '../../assets/img/bluetooth_search.svg';
 import stores from '../../stores';
-import {useIsFocused} from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 
-const SearchViewer = ({navigation}: {navigation: any}) => {
+const SearchViewer = ({ navigation }: { navigation: any }) => {
   const isFocused = useIsFocused();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -28,7 +28,12 @@ const SearchViewer = ({navigation}: {navigation: any}) => {
 
   React.useEffect(() => {
     if (isFocused) {
-      stores.RFIDStore.onSearchBluetooth();
+      const onSearchBluetooth = async () => {
+        console.log("onSearchBluetooth", "여기 반응오나요?");
+
+        await stores.RFIDStore.onSearchBluetooth();
+      }
+      onSearchBluetooth();
 
       console.log('5초뒤 페이지 이동!!');
       setTimeout(async () => {
@@ -48,7 +53,7 @@ const SearchViewer = ({navigation}: {navigation: any}) => {
           },
         ]}>
         <Text style={styles.textStyle}> Bluetooth 찾는 중...</Text>
-        <View style={{height: 60}} />
+        <View style={{ height: 60 }} />
         <BluetoothSearchSvg height={300} width={300} />
       </Animated.View>
     </SafeAreaView>

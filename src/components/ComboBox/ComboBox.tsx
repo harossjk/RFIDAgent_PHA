@@ -1,7 +1,7 @@
-import React, {useState, useRef} from 'react';
-import {Picker} from '@react-native-picker/picker';
-import {AxiosResponse} from 'axios';
-import {getMap, mapEntity} from '../Utils/Utils';
+import React, { useState, useRef } from 'react';
+import { Picker } from '@react-native-picker/picker';
+import { AxiosResponse } from 'axios';
+import { getMap, mapEntity } from '../Utils/Utils';
 import stores from '../../stores';
 
 interface props {
@@ -103,7 +103,7 @@ const ComboBox = ({
   };
   return (
     <Picker
-      itemStyle={{fontFamily: family, fontSize: size}}
+      itemStyle={{ fontFamily: family, fontSize: size }}
       selectedValue={selectCombo}
       style={{
         height: 50,
@@ -113,7 +113,7 @@ const ComboBox = ({
         fontFamily: family,
         fontSize: size,
       }}
-      onFocus={() => {}}
+      onFocus={() => { }}
       onValueChange={(itemValue: any, itemIndex: number) => {
         setSelectedCombo(itemValue);
         selectMoldData(itemValue, itemIndex);

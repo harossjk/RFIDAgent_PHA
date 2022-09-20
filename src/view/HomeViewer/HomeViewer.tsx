@@ -16,33 +16,22 @@ import { Avatar, Title, Caption } from 'react-native-paper';
 import stores from '../../stores';
 import MoldMoveSvg from '../../assets/img/moldmove.svg';
 import MoldInfoSvg from '../../assets/img/moldinfo.svg';
-import { backgroundColor } from 'styled-system';
 
-const HomeViewer = ({
-  navigation,
-  pageInfo,
-  onPressPageMove,
-}: {
-  navigation: any;
-  pageInfo: any;
-  onPressPageMove: any;
-}) => {
+const HomeViewer = (props: { navigation: any; pageInfo: any; onPressPageMove: any; }) => {
   async function VerifConnect() {
     try {
       if (stores.RFIDStore.isConnect) {
         let isHandler = await stores.RFIDStore.SendSetRFIDHandler();
         if (isHandler) {
-          let deviceinfo = await stores.RFIDStore.RequestDeviceConfig();
-          console.log(VerifConnect, deviceinfo);
+          await stores.RFIDStore.RequestDeviceConfig();
+          // if (deviceinfo === null || deviceinfo === undefined) {
+          //   let bOk = true;
 
-          if (deviceinfo === null || deviceinfo === undefined) {
-            let bOk = true;
-
-            while (bOk) {
-              deviceinfo = await stores.RFIDStore.RequestDeviceConfig();
-              if (deviceinfo !== null || deviceinfo !== undefined) break;
-            }
-          }
+          //   while (bOk) {
+          //     deviceinfo = await stores.RFIDStore.RequestDeviceConfig();
+          //     if (deviceinfo !== null || deviceinfo !== undefined) break;
+          //   }
+          // }
         } else {
           console.log(HomeViewer, 'RFID Handler 연결안됨 다시요청');
         }
@@ -53,11 +42,11 @@ const HomeViewer = ({
   }
 
   React.useEffect(() => {
-    VerifConnect();
+    // VerifConnect();
   }, []);
 
   const onMoldInfoPress = (pageInfo: string) => {
-    onPressPageMove(pageInfo);
+    props.onPressPageMove(pageInfo);
   };
 
   return (
@@ -78,8 +67,8 @@ const HomeViewer = ({
             color={'#fff'}
             style={{ backgroundColor: '#000' }}
           />
-          <Title style={styles.headerTitle}>Administer</Title>
-          <Caption style={styles.headerSubTitle}>금형관리반</Caption>
+          {stores.MoldStore.getUserInfo === undefined ? <></> : <Title style={styles.headerTitle}>{stores.MoldStore.getUserInfo[0].userNm}</Title>}
+          {stores.MoldStore.getUserInfo === undefined ? <></> : <Caption style={styles.headerSubTitle}>{stores.MoldStore.getUserInfo[0].userDept}</Caption>}
         </View>
         <View
           style={{
@@ -94,7 +83,7 @@ const HomeViewer = ({
           <TouchableOpacity
             style={styles.homeTochitemContainer}
             activeOpacity={0.9}
-            onPress={() => onMoldInfoPress(pageInfo.Mold_Article)}>
+            onPress={() => onMoldInfoPress(props.pageInfo.Mold_Article)}>
             <View style={styles.homeItemContainer}>
               <View style={styles.rectangleLayoutcontainer}>
                 <MoldMoveSvg height={100} width={100} fill={'#000'} />
@@ -105,7 +94,7 @@ const HomeViewer = ({
           <TouchableOpacity
             style={styles.homeTochitemContainer}
             activeOpacity={0.9}
-            onPress={() => onMoldInfoPress(pageInfo.MoldSearch)}>
+            onPress={() => onMoldInfoPress(props.pageInfo.MoldSearch)}>
             <View style={styles.homeItemContainer}>
               <View style={styles.rectangleLayoutcontainer}>
                 <MoldInfoSvg height={80} width={80} fill={'#000'} />

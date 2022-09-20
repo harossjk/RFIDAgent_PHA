@@ -1,7 +1,9 @@
-import axios from 'axios';
-import { makeObservable, observable, action, runInAction, computed } from 'mobx';
+import axios, { AxiosResponse, AxiosError } from 'axios';
+import { makeObservable, observable, action, runInAction, computed, toJS } from 'mobx';
 import { baseURL } from '../components/Sever/Sever';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import stores from '.';
+import RequestHandler from './RequestHandler';
 
 export const urls = {
 
@@ -19,8 +21,10 @@ export const urls = {
   moldOutList: `${baseURL}/moldout/`, //get
 
   rackList: `${baseURL}/rack/barcode`,
+  userList: `${baseURL}/user`,
   login: `${baseURL}/user/login`,
   rackSearch: `${baseURL}/mold/position`,
+  altcode: `${baseURL}/code/altcode`,
 };
 
 export interface MoldMasterEntitiy {
@@ -107,6 +111,29 @@ export interface MoldOutEntry {
   [prop: number]: any;
 }
 
+export interface CodeEntity {
+  corpCode?: string,
+  mainCode?: string,
+  mainName?: string,
+  subCode?: string,
+  cateCode?: string,
+  codeName?: string,
+  attrNum1?: any,
+  attrNum2?: any,
+  attrStr1?: string,
+  attrStr2?: string,
+  attrJson?: string,
+  useYn?: string,
+  remark?: string,
+  createUserId?: string,
+  createDt?: Date | any
+  updateUserId?: string,
+  updateDt?: Date | any,
+  optionCode?: string,
+  optionName?: string,
+}
+
+
 export interface MoldInEntry {
   corpCode?: string;
   inCorpCode?: string;
@@ -124,6 +151,7 @@ export interface MoldInEntry {
   createUserId?: string;
   updateUserId?: string;
   gubunName?: string;
+  positionDetailName?: string;
 }
 
 export interface dayType {
@@ -137,12 +165,59 @@ export interface rackinfo {
   pos?: string
 }
 
+export interface userInfo {
+  corpCode?: string,
+  createDt?: string,
+  createUserId?: string,
+  email?: string,
+  isReceiveEmail?: boolean,
+  loginDt?: string,
+  logoutDt?: string,
+  menuAuthDic?: any,
+  partnerCode?: string,
+  returnValue?: string | null | number,
+  token?: string,
+  totalCount?: number,
+  updateDt?: string,
+  updateUserId?: string,
+  useYn?: string,
+  userDept?: string,
+  userGubun?: string,
+  userId?: string,
+  userNm?: string,
+}
+
+
+
 class MoldInStore {
+
+  m_userInfo: userInfo[] = [{
+    corpCode: "",
+    createDt: "",
+    createUserId: "",
+    email: "",
+    isReceiveEmail: false,
+    loginDt: "",
+    logoutDt: "",
+    menuAuthDic: {},
+    partnerCode: "",
+    returnValue: "",
+    token: "",
+    totalCount: 0,
+    updateDt: "",
+    updateUserId: "",
+    useYn: "",
+    userDept: "",
+    userGubun: "",
+    userId: "",
+    userNm: "",
+  }];
   moldMasterData: any = {} // 마스터에 등록된 RFID 용
   moldMasterDataS: any[] = [];
   // 입고이력
   moldInDataList: any[] = [];
   moldInAbleData: MoldInEntry | undefined[] = [];
+  moldInAbleDataList: MoldInEntry | undefined[] = [];
   moldInTempData: MoldInEntry = {};
   // 출고이력
   moldOutDataList: any[] = [];
@@ -159,6 +234,7 @@ class MoldInStore {
   constructor() {
     makeObservable(this, {
       //variable
+      m_userInfo: observable,
       moldMasterDataS: observable,
       moldMasterData: observable,
       moldInAbleData: observable,
@@ -169,10 +245,12 @@ class MoldInStore {
       moldOutDataList: observable,
       searchBarcodeData: observable,
       serachRackPostion: observable,
+      moldInAbleDataList: observable,
 
       isMoldal: observable,
       rackinfo: observable,
 
+      SearchAltCode: action,
       moldIsClearUpdate: action,
       moldMasterList: action,
       moldSelectOne: action,
@@ -184,6 +262,7 @@ class MoldInStore {
       searchMoldOutList: action,
       rackList: action,
       rackPosition: action,
+      Login: action,
 
       //set
       SetMoldInData: action,
@@ -193,6 +272,7 @@ class MoldInStore {
       SetRackinfo: action,
 
       //get
+      getUserInfo: computed,
       getMoldMasterData: computed,
       getMoldInTempData: computed,
       getMoldinAbleData: computed,
@@ -204,7 +284,8 @@ class MoldInStore {
       getBarcodeData: computed,
       getModalStatuse: computed,
       getRackinfo: computed,
-      getRackPostion: computed
+      getRackPostion: computed,
+      getMoldInAbleDataList: computed
     });
   }
 
@@ -223,49 +304,89 @@ class MoldInStore {
   }
 
 
-  SetMoldModalVisible(isVisible: boolean) {
+  async SetMoldModalVisible(isVisible: boolean) {
     runInAction(() => {
       this.isMoldal = isVisible;
+      console.log("SetMoldModalVisible", this.isMoldal);
+
     })
   }
   get getModalStatuse() {
     return this.isMoldal;
   }
 
-  async Login() {
-    try {
-      const response = await axios.post(urls.login, { corpCode: "PH", userId: "admin", userPw: "11111" });
-      runInAction(() => {
-        if (response.data !== null || response.data !== undefined) {
-          const user = response.data;
-
-          console.log("로그인 부분 확인용 ", user.token, user.menuAuthDic);
-
-          AsyncStorage.setItem("auth-token", user.token);
-          AsyncStorage.setItem("menu-auth", JSON.stringify(user.menuAuthDic));
-
-          console.log("로그인됨");
-
-        }
-        else {
-          console.log("로그인 안됨");
+  //jjk, 22.05.25
+  async Login(loginInfo: any): Promise<number> {
+    return new Promise(async (reslove, reject) => {
+      let bOk: number = -4;
+      try {
+        if (loginInfo === null || loginInfo === undefined) {
+          //객체가 아무것도 안들어왔을때 
+          bOk = 0;
+          reslove(bOk);
         }
 
-      });
-    } catch (err) {
-      console.log(err);
-    }
+        if (loginInfo.Id === "" && loginInfo.Pw === "") {
+          //-1 : id,pw 둘다 입력 안했을때
+          bOk = -1;
+          reslove(bOk);
+        }
+        else if (loginInfo.Id !== "" && loginInfo.Pw === "") {
+          //-2 : id 있고 패스워드만 입력 안했을때
+          bOk = -2;
+          reslove(bOk);
+        }
+        else if (loginInfo.Id === "" && loginInfo.Pw !== "") {
+          //-3 : pw 있고 아이디만 입력 안했을때
+          bOk = -3;
+          reslove(bOk);
+        }
+
+        const response = await RequestHandler<AxiosResponse<any>>("post", urls.login, { corpCode: "PH", userId: loginInfo.Id, userPw: loginInfo.Pw }); //로그인
+
+
+        runInAction(async () => {
+          if (response && response.data && response.data.token) {
+            const user = response.data;
+            AsyncStorage.setItem("auth-token", user.token);
+            AsyncStorage.setItem("menu-auth", JSON.stringify(user.menuAuthDic));
+            const userResponse = await RequestHandler<AxiosResponse<any>>("get", urls.userList, {});
+
+            if (userResponse && userResponse.data) {
+
+              this.m_userInfo = userResponse.data.filter((props: { userId: any; }) => props.userId === loginInfo.Id);
+              console.log("로그인됨", toJS(this.m_userInfo));
+              bOk = 1;
+              reslove(bOk);
+            }
+            else {
+              console.log("로그인 안됨1", "data: " + response.data);
+              bOk = 0;
+              reslove(bOk);
+            }
+          }
+          else {
+            console.log("로그인 안됨2", "data: " + response.data);
+            bOk = 0;
+            reslove(bOk);
+          }
+
+        });
+      } catch (err) {
+        console.log(err);
+        reject(err);
+      }
+    });
   }
 
 
   async rackList() {
     try {
-      const response = await axios.get(urls.rackList);
+      const response = await RequestHandler<AxiosResponse<any>>("get", urls.rackList, {});
       runInAction(() => {
         if (response.data !== null || response.data !== undefined)
           this.searchBarcodeData = response.data;
-        console.log("rackList : ", this.searchBarcodeData);
-
+        //console.log("rackList : ", this.searchBarcodeData);
       });
     } catch (err) {
       console.log(err);
@@ -276,7 +397,7 @@ class MoldInStore {
   //금형마스터에 RFID의 세척 상태를 업데이트 해주는 함수
   async moldIsClearUpdate(rfid: string, corpCode: string, factoryCode: string, isClear: string,): Promise<any> {
     try {
-      const response = await axios.post(urls.moldClearUpdate, { rfid: rfid, corpCode: corpCode, factoryCode: factoryCode, isClear: isClear });
+      const response = await RequestHandler<AxiosResponse<any>>("post", urls.moldClearUpdate, { rfid: rfid, corpCode: corpCode, factoryCode: factoryCode, isClear: isClear });
       console.log("업데이트 진해오딤?", response);
 
     } catch (err) {
@@ -288,7 +409,7 @@ class MoldInStore {
     //0 false, 1 true, -1 NetError
     let bOk = 0;
     try {
-      const response = await axios.get(urls.moldSelect);
+      const response = await RequestHandler<AxiosResponse<any>>("get", urls.moldSelect, {});
       //console.log('axios moldSelect', response.data);
       let tempData: any[] = response.data;
       runInAction(async () => {
@@ -323,9 +444,7 @@ class MoldInStore {
     //0 false, 1 true, -1 NetError
     let bOk = 0;
     try {
-      const response = await axios.get(urls.moldSelectOne, {
-        params: { rfid: rfid },
-      });
+      const response = await RequestHandler<AxiosResponse<any>>("get", urls.moldSelectOne, { rfid: rfid });
       console.log('axios moldSelectOne', response.data);
 
       let tempData: any[] = response.data;
@@ -360,32 +479,79 @@ class MoldInStore {
     return await bOk;
   }
 
+  //jjk, 22.09.19 - Rack Code 조회하기위해 AltCode를 가져오는 함수
+  async SearchAltCode(corpCode: string, mainCode: string, altCode: string) {
+    try {
+      const response = await RequestHandler<AxiosResponse<CodeEntity>>("get", urls.altcode, { corpCode: corpCode, mainCode: mainCode, altCode: altCode });
+      if (response.data === undefined || response.data === null)
+        return null;
+
+      return response.data;
+    } catch (err) {
+      console.log("SearchAltCode", err);
+    }
+  }
+
   async rackPosition(factoryCode: string, rfid: string) {
     try {
-      const response = await axios.get(urls.rackSearch, {
-        params: { factoryCode: factoryCode, moldRfid: rfid }
-      });
+      const response = await RequestHandler<AxiosResponse<any>>("get", urls.rackSearch, { factoryCode: factoryCode, moldRfid: rfid });
 
       runInAction(() => {
         this.serachRackPostion = response.data;
-        console.log("rackPosition", response.data);
+        //console.log("rackPosition", response.data);
       })
     }
     catch (err) {
       console.log("rackPosition", err);
     }
   }
+
   get getRackPostion() {
     return this.serachRackPostion
   }
 
+
+  async inAbleMoldList() {
+    try {
+      const response = await RequestHandler<AxiosResponse<any>>("get", urls.moldinAble, {});
+      runInAction(() => {
+        this.moldInAbleData = [];
+        if (response.data.length > 0) {
+          this.moldInAbleDataList = response.data;
+        }
+      });
+    } catch (error) {
+      console.log('inAbleMoldList :  ', error);
+    }
+  }
+  get getMoldInAbleDataList() {
+    return this.moldInAbleDataList;
+  }
   //입고가 가능한 금형 리스트
   async inAbleMolds(rfid: string) {
+
+    // return new Promise(async (reslove, reject) => {
+    //   try {
+    //     const response = await RequestHandler<AxiosResponse<any>>("get", urls.moldinAble, {});
+    //     runInAction(() => {
+    //       if (response && response.data && response.data.token) {
+    //         this.moldInAbleData = response.data.filter((key: any, idx: number) => response.data[idx]['rfid'] === rfid,);
+    //         reslove(this.moldInAbleData);
+    //       }
+    //       else
+    //         reslove(this.moldInAbleData);
+    //     });
+    //   } catch (err) {
+    //     console.log(err);
+    //     reject(err);
+    //   }
+    // });
+
     console.log('RFID :  ', rfid);
     //0 false, 1 true, -1 NetError
 
     try {
-      let response = await axios.get(urls.moldinAble);
+      const response = await RequestHandler<AxiosResponse<any>>("get", urls.moldinAble, {});
       runInAction(() => {
         this.moldInAbleData = [];
         if (response.data.length > 0) {
@@ -410,7 +576,7 @@ class MoldInStore {
     //0 false, 1 true, -1 NetError
     let bOk = 0;
     try {
-      const response = await axios.get(urls.moldoutAble);
+      const response = await RequestHandler<AxiosResponse<any>>("get", urls.moldoutAble, {});
       runInAction(async () => {
         this.moldOutAbleData = [];
         if (response.data.length > 0) {
@@ -450,7 +616,7 @@ class MoldInStore {
     let bOk = 0;
     try {
       this.moldInDataList = [];
-      const response = await axios.get(urls.moldInList, {});
+      const response = await RequestHandler<AxiosResponse<any>>("get", urls.moldInList, {});
       //console.log('axios serachMoldInList', response.data);
 
       runInAction(async () => {
@@ -474,19 +640,24 @@ class MoldInStore {
   }
 
   //DB Mold in 추가
-  addMoldIn = async (data: MoldInEntry) => {
-    console.log('들어온addMold', data);
+  async addMoldIn(data: MoldInEntry): Promise<any> {
+    let bOK = "";
     try {
 
-      const token = await AsyncStorage.getItem("auth-token");
-      //console.log("token", token);
-      const headers = { Authorization: `Bearer ${token}` }
-      console.log("headers", headers);
+      // const token = await AsyncStorage.getItem("auth-token");
+      // //console.log("token", token);
+      // const headers = { Authorization: `Bearer ${token}` }
+      // console.log("headers", headers);
 
-      const response = await axios.put(urls.moldinAdd, { ...data }, { headers });
-      console.log(response.data);
-    } catch (err) {
-      console.log('여기 들어오는지 확인 ', err);
+      // const response = await axios.put(urls.moldinAdd, { ...data }, { headers });
+      // console.log(response.data);
+
+      const response = await RequestHandler<AxiosResponse<any>>("put", urls.moldinAdd, { ...data });
+      bOK = "OK";
+      console.log('들어온addMold', response.data);
+      return bOK;
+    } catch (err: any) {
+      return err.response.data.detail;
     }
   };
 
@@ -494,12 +665,9 @@ class MoldInStore {
   addMoldOut = async (data: MoldOutEntry) => {
     console.log('들어온addout', data);
     try {
-      const response = await axios.put(urls.moldoutAdd, {
-        ...data,
-      });
-      console.log(response.data);
+      const response = await RequestHandler<AxiosResponse<any>>("put", urls.moldoutAdd, { ...data, });
     } catch (err) {
-      console.log('여기 들어오는지 확인 ', err);
+      console.log("Error : ", err);
     }
   };
 
@@ -510,7 +678,7 @@ class MoldInStore {
     let bOk = 0;
     try {
       this.moldOutDataList = [];
-      const response = await axios.get(urls.moldOutList, {});
+      const response = await RequestHandler<AxiosResponse<any>>("get", urls.moldOutList, {});
       runInAction(async () => {
         if (response.data.length > 0) {
           this.moldOutDataList = response.data;
@@ -686,6 +854,9 @@ class MoldInStore {
   }
   get getBarcodeData() {
     return this.searchBarcodeData;
+  }
+  get getUserInfo() {
+    return this.m_userInfo;
   }
 }
 

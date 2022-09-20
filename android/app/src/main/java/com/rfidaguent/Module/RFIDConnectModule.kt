@@ -5,9 +5,11 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.facebook.react.bridge.*
+import com.rfidaguent.Class.CPreferenceUtil
+import com.rfidaguent.MainActivity
+import com.rfidaguent.MainApplication
 import com.rfidaguent.RFIDConnect.Class.CRFIDControl
 import org.json.JSONObject
-
 
 class RFIDConnectModule(val reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
@@ -15,6 +17,7 @@ class RFIDConnectModule(val reactContext: ReactApplicationContext) :
     private var constants: MutableMap<String, Any> = HashMap()
     private var m_cRFIDControl = CRFIDControl(reactContext);
     private var arrayListDevice: MutableMap<String, String>? = null
+    private var m_preferences : CPreferenceUtil? = CPreferenceUtil(reactContext)
 
     //React Native Module 필수 함수.
     override fun getName(): String {

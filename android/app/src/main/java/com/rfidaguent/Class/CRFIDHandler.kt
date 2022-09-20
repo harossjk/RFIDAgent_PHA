@@ -213,10 +213,15 @@ class CRFIDHandler(rfidManager: RFIDManager, looper: Looper) : android.os.Handle
     }
 
     fun getDeviceConfig(): MutableMap<String, Any> {
-        if (this.m_rfidManager != null) {
+        if (this.m_rfidManager != null && this.m_rfidManager?.IsOpened() == true) {
 
+            //A & B Mode로 바꾸어서 연속으로 Tag를 읽게 바꿈
+            paramOfInvent!!.session = 1
+            paramOfInvent!!.q = 5
+            paramOfInvent!!.inventoryFlag = 2
+            m_rfidManager!!.SetInventoryParam(paramOfInvent)
 
-            mapDevicConfigS["devName"] = this.m_rfidManager!!.GetBtDevice()!!.uppercase() //디바이스 이름
+            mapDevicConfigS["devName"] = this.m_rfidManager!!.GetBtDevice().uppercase() //디바이스 이름
             Log.d("devName", mapDevicConfigS["devName"].toString())
 
             mapDevicConfigS["devMacAdrr"] =

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
   BackHandler,
+  ScrollView,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -24,61 +25,122 @@ import { getMap } from '../../components/Utils/Utils';
 import { tagType } from '../../stores/RFIDStore';
 import { runInAction } from 'mobx';
 import { moldSelectOne, playStore, tag } from '../../stores/PlayStoreData';
+import { bottom } from 'styled-system';
 
 
 
 const TagHader = () => {
+  const onItemClear = () => {
+    if (
+      stores.RFIDStore.getScanData.length === 0 ||
+      stores.RFIDStore.getScanData === undefined
+    )
+      return;
+    stores.RFIDStore.setTagDataClear();
+    stores.StepStore.SetNoticeVisible(true);
+  };
+
   return (
+
     <View style={styles.topHeaderContainer}>
-      <Text style={styles.lbTopTitle}>
-        선택 수 : {stores.RFIDStore.getTagChkCount}
-      </Text>
-      <Text style={styles.lbTopTitle}>
-        스캔 수 : {stores.RFIDStore.getScanData.length}
-      </Text>
+      <TouchableOpacity activeOpacity={0.9} onPress={onItemClear}>
+        <View
+          style={{
+            left: -10,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            // backgroundColor: 'pink',
+            // flex: 1,
+            // bottom: 5
+          }}>
+          <Avatar.Icon
+            icon="delete"
+            size={30}
+            color={'#fff'}
+            style={{ backgroundColor: '#000', marginHorizontal: 10 }}
+          />
+          <Text style={styles.lbTopTitle}> 목록지우기</Text>
+        </View>
+      </TouchableOpacity>
+
+      <View
+        style={{
+          left: -10,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          // backgroundColor: 'pink',
+          // flex: 1,
+          // bottom: 5
+        }}>
+
+        <Text style={styles.lbTopTitle}>
+          스캔 수 : {stores.RFIDStore.getScanData.length}
+        </Text>
+      </View>
     </View>
   );
 };
 
 const GetScanData = (props: { navigation: any; setVisible: any }) => {
+  const currentIndex = React.useRef(0);
   const flatList = React.useRef<any>();
-
   useEffect(() => {
     if (playStore) {
       stores.StepStore.SetNoticeVisible(false);
-
-
     }
     else {
       if (stores.RFIDStore.getScanData.length > 0) {
         stores.StepStore.SetNoticeVisible(false);
+        console.log("현재 태그 읽힌 수량", stores.RFIDStore.getScanData.length);
       }
     }
 
   }, [stores.RFIDStore.getScanData]);
 
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     // Change data.length to ads.length here
+  //     currentIndex.current = currentIndex.current === stores.RFIDStore.getScanData.length - 1
+  //       ? stores.RFIDStore.getScanData.length - 1
+  //       : currentIndex.current + 1;
 
-  // const SearchMoldData = async () => {
-  //   if (stores.RFIDStore.getScanData.length > 0) {
-  //     await stores.StepStore.SetNoticeVisible(false);
-  //   }
-  // }
+  //     flatList?.current.scrollToIndex({
+  //       animated: true,
+  //       index: currentIndex.current,
+  //     });
+  //   }, 500);
+  //   return () => clearInterval(timer);
+  // }, [])
 
-  // SearchMoldData();
 
   const onPrssCheck = (item: any) => {
     stores.RFIDStore.setScanData(item, !stores.RFIDStore.getScanData[item]['isChek']);
     if (stores.RFIDStore.getScanData[item]['isChek']) {
-      onMoveToBarcode();
+      if (stores.RFIDStore.getScanData[item].moldName === undefined) {
+        stores.RFIDStore.SendToastMessage("금형 조회불가 이동할수 없습니다.")
+        stores.RFIDStore.setScanData(item, false);
+      }
+      else {
+        onMoveToBarcode();
+      }
     }
   };
 
   const onEndReached = () => {
-    if (stores.RFIDStore.getScanData.length !== 0)
-      flatList.current.scrollToIndex({
-        index: stores.RFIDStore.getScanData.length - 1,
-      });
+    if (stores.RFIDStore.getScanData.length !== 0) {
+      console.log("맨끝이동 이벤트 ");
+      flatList.current.scrollToEnd({ animated: true })
+      // flatList.current.scrollToIndex({
+      //   index: stores.RFIDStore.getScanData.length - 1,
+      //   viewPosition: 1,
+      // });
+    }
+
+
   };
+
 
   const onMoveToBarcode = async () => {
     if (playStore)
@@ -105,7 +167,7 @@ const GetScanData = (props: { navigation: any; setVisible: any }) => {
           props.setVisible(false);
           return;
         } else if (bOK === 1) {
-          await stores.StepStore.SetStepState(1);
+          await stores.StepStore.SetStepState(2);
           await stores.RFIDStore.SendSetScanMode(1);
           await stores.RFIDStore.setBarcodeDataClear();
           await props.navigation.navigate('StackBarcodeDetail'); //StackBarcode
@@ -219,6 +281,7 @@ const GetScanData = (props: { navigation: any; setVisible: any }) => {
             keyExtractor={item => String(item.id)}
             onEndReachedThreshold={0.8}
             onEndReached={onEndReached}
+            onLayout={() => flatList.current.scrollToEnd({ animated: true })}
             onScrollToIndexFailed={() => { }}
           />
         )}
@@ -394,6 +457,8 @@ const StepViewer_Tag = ({ navigation }: { navigation: any }) => {
       stores.RFIDStore.SendSetRFIDHandler();
       stores.RFIDStore.RequestModeVerify();
 
+      console.log("모드상태 ", stores.RFIDStore.getMode);
+
       if (stores.RFIDStore.getScanData.length > 0) {
         stores.RFIDStore.setScanData(stores.StepStore.getSelectedTagId, false);
       }
@@ -401,18 +466,11 @@ const StepViewer_Tag = ({ navigation }: { navigation: any }) => {
       if (stores.RFIDStore.getReadBarcodeData.result !== "READ_FAIL")
         stores.RFIDStore.setBarcodeDataClear();
 
-      if (stores.RFIDStore.getMode === 1) {
+      if (stores.RFIDStore.getMode === 1 || stores.RFIDStore.getMode === 0) {
         stores.RFIDStore.SendSetScanMode(0);
       }
     });
   }
-
-  // React.useEffect(() => {
-  //   const initComponet = async () => {
-  //     await init();
-  //   }
-  //   initComponet();
-  // }, [])
 
   const isFocused = useIsFocused();
   React.useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import {
   Avatar,
@@ -17,7 +17,8 @@ import {
 } from '@react-navigation/drawer';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import stores from '../../stores';
+import { flexDirection } from 'styled-system';
 
 const draweritemSelect = {
   home: true,
@@ -42,26 +43,24 @@ const CustomSidebarMenu = (props: any) => {
     setActiveDrawer(tempActiveDrawer);
   };
 
+  //stores.MoldStore.getUserInfo[0].userNm
+  //stores.MoldStore.getUserInfo[0].userDept
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props}>
         <View style={styles.drawerContent}>
           <View style={styles.userInfoSection}>
-            <View style={{ flexDirection: 'row', marginTop: 14 }}>
-              <Avatar.Icon
-                style={{ backgroundColor: '#428BCA' }}
-                icon="face"
-                size={55}
-              />
+            <View style={{ flex: 1, marginTop: 30, flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Avatar.Icon style={{ backgroundColor: '#428BCA' }} icon="face" size={55} />
               {/* <Image
                 style={{height: 46 , width: 115,top:8, }}
                 source={require('../../assets/img/phc.png')}
               /> */}
-              <View style={{ marginLeft: 20, flexDirection: 'column' }}>
-                <Title style={styles.title}>Administer</Title>
-                <Caption style={styles.caption}>금형관리반</Caption>
+              <View style={{ flex: 2, left: 10 }}>
+                {stores.MoldStore.getUserInfo === undefined ? <></> : <Title style={styles.title}>{stores.MoldStore.getUserInfo[0].userId}</Title>}
+                {stores.MoldStore.getUserInfo === undefined ? <></> : <Caption style={styles.caption}>{stores.MoldStore.getUserInfo[0].userDept}</Caption>}
               </View>
-              <TouchableOpacity style={{ left: 10 }}
+              <TouchableOpacity style={{ flex: 1, justifyContent: 'center', right: 10 }}
                 onPress={() => {
                   onActivDarwer('Logout');
                   props.navigation.navigate('DrawerLogin');
@@ -73,9 +72,9 @@ const CustomSidebarMenu = (props: any) => {
             <View style={styles.row}>
               <View style={styles.section}>
                 <Paragraph style={[styles.paragraph, styles.caption]}>
-                  Administer{' '}
+                  {stores.MoldStore.getUserInfo === undefined ? "" : stores.MoldStore.getUserInfo[0].userNm}
                 </Paragraph>
-                <Caption style={styles.caption}>사용자님 안녕하세요.</Caption>
+                <Caption style={styles.caption}>님 안녕하세요.</Caption>
               </View>
             </View>
           </View>
@@ -147,7 +146,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   caption: {
-    fontSize: 15,
+    fontSize: 17,
     lineHeight: 20,
   },
   row: {

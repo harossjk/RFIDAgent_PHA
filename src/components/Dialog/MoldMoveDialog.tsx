@@ -12,6 +12,8 @@ import { inject, observer } from 'mobx-react'
 
 
 const MoldMoveDialog = (props: { modalVisible: boolean, SendDailogState: any }): React.ReactElement => {
+
+    console.log("MoldMoveDialog 진입?", stores.MoldStore.getRackinfo.id);
     const onPressOk = (isVisible: boolean) => {
         props.SendDailogState(isVisible);
     };
@@ -56,10 +58,10 @@ const MoldMoveDialog = (props: { modalVisible: boolean, SendDailogState: any }):
                     <Text style={{ textAlign: 'left', fontFamily: 'NanumSquareEB', color: '#808080', fontSize: 20, }}>
                         TAG : {stores.MoldStore.getRackinfo.id}
                         {'\n'}
-                        위치 : {stores.MoldStore.getRackinfo.pos}
+                        위치 : {stores.RFIDStore.getReadBarcodeData.result}
                         {'\n'}
                     </Text>
-                    <Text style={{ textAlign: 'left', fontFamily: 'NanumSquareEB', color: '#5CB85C', fontSize: 15, }}>
+                    <Text style={{ textAlign: 'left', fontFamily: 'NanumSquareEB', color: '#5CB85C', fontSize: 18, }}>
                         금형이동 정상완료 되었습니다.
                     </Text>
                     {/* <Text style={{ textAlign: 'left', fontFamily: 'NanumSquareEB', color: '#5CB85C', fontSize: 14, }}>

@@ -10,7 +10,9 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
+import android.os.Handler
 import android.os.HandlerThread
+import android.os.Message
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.TextView
@@ -22,6 +24,10 @@ import com.rfidaguent.Class.CScanHandler
 import device.common.rfid.ModeOfInvent
 import device.common.rfid.RFIDConst
 import device.sdk.RFIDManager
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -139,17 +145,22 @@ class CRFIDControl (private val reactContext: ReactApplicationContext) {
     fun DisScannerHandlerCallBack(){
         m_scanHandler!!.DisScannerHandlerCallBack()
     }
-    //endregion
 
+    //endregion
     fun setConnect(deviceName: String?,macAddress: String? ) {
-        this.isConnected = true;
+
         this.connectedDeviceMacAddress = macAddress!!
         this.m_rfidManager?.ConnectBTDevice(macAddress, deviceName)
+
+        this.isConnected = this.m_rfidManager!!.IsOpened();
+        this.m_rfidHandler?.postDelayed({}, 10000)
     }
+
 
     fun setDisconnect() {
         this.isConnected = false
         this.m_rfidManager?.DisconnectBTDevice()
+        this.m_rfidManager?.Close()
     }
 
     fun addDeviceToTheList(bluetoothDevice: BluetoothDevice){
@@ -163,11 +174,12 @@ class CRFIDControl (private val reactContext: ReactApplicationContext) {
         }
         arrayListDevice!!.put(bluetoothDevice.name, bluetoothDevice.address)
         if (isConnected){
-            arrayListDevice!!.put(bluetoothDevice.name, bluetoothDevice.address+ " - Connected")
+            arrayListDevice!!.put(bluetoothDevice.name, bluetoothDevice.address+ " - Error")
         }
     }
 
     fun getDeviceToList(): MutableMap<String, String>? {
+        this.m_rfidManager?.Open(1);
         return arrayListDevice
     }
 

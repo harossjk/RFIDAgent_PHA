@@ -1,10 +1,10 @@
-import axios from 'axios';
-import { makeObservable, observable, action, runInAction, computed } from 'mobx';
-import { autoAction } from 'mobx/dist/internal';
+import axios, { AxiosResponse } from 'axios';
+import { makeObservable, observable, action, runInAction, computed, toJS } from 'mobx';
 import { NativeModules, DeviceEventEmitter } from 'react-native';
 
 import { DeviceConfig } from '../components/DeviceObject';
 import { baseURL } from '../components/Sever/Sever';
+import RequestHandler from './RequestHandler';
 const { RFIDConnectModule } = NativeModules;
 
 export interface tagType {
@@ -45,12 +45,7 @@ class RFIDStore {
   isTagAllChkState: boolean = false;
 
   isBarcodeRead: boolean = false;
-
-
   prevReadMode: number = 1;
-
-
-
   isVisible: boolean = false;
 
   isGunPress: boolean = false;
@@ -118,6 +113,7 @@ class RFIDStore {
       setPrevReadMode: action,
       SetModalVisible: action,
       SetGunPress: action,
+
       //property
       getBluetoothInfo: computed,
       getDeviceInfo: computed,
@@ -137,7 +133,6 @@ class RFIDStore {
       isSearch: computed,
     });
   }
-
   get getIsGunPress() {
     return this.isGunPress;
   }
@@ -155,7 +150,7 @@ class RFIDStore {
     return this.prevReadMode;
   }
 
-  setBarcodeReadStatuse(isStatuse: boolean) {
+  async setBarcodeReadStatuse(isStatuse: boolean) {
     runInAction(() => {
       this.isBarcodeRead = isStatuse;
     })
@@ -213,11 +208,23 @@ class RFIDStore {
   async VerifyConnect() {
     try {
       const isConnect: any = await RFIDConnectModule.getRFIDIsConnect();
+      console.log('VerifyConnect :', isConnect);
+
       runInAction(() => {
         this.isRFIDConnect = isConnect;
       });
     } catch (error) {
       console.log('VerifyConnect error:', error);
+    }
+  }
+
+  async SetConnect(isConnect: boolean) {
+    try {
+      runInAction(() => {
+        this.isRFIDConnect = isConnect;
+      });
+    } catch (error) {
+      console.log('SetConnect error:', error);
     }
   }
 
@@ -232,15 +239,30 @@ class RFIDStore {
     }
   }
 
-  async onSearchBluetooth() {
-    try {
-      await RFIDConnectModule.onSearchBluetooth();
-    } catch (error) {
-      console.log('onSearchBluetooth error:', error);
-      runInAction(() => {
-        this.bluetoothInfo = 'error';
-      });
-    }
+  async onSearchBluetooth(): Promise<any> {
+    return new Promise(async (reslove, reject) => {
+      try {
+        const response = await RFIDConnectModule.onSearchBluetooth();
+        if (response && response.data) {
+          runInAction(async () => {
+            reslove(response.data)
+          });
+        }
+      } catch (err) {
+        console.log(err);
+        reject(err);
+      }
+    });
+
+
+    // try {
+    //   await RFIDConnectModule.onSearchBluetooth();
+    // } catch (error) {
+    //   console.log('onSearchBluetooth error:', error);
+    //   runInAction(() => {
+    //     this.bluetoothInfo = 'error';
+    //   });
+    // }
   }
 
   async onDeviceConnect(devName: any, devMacAdrr: any) {
@@ -323,12 +345,20 @@ class RFIDStore {
     try {
       let sliceData: string = scanData.slice(10, 16);
       if (scanData !== null || scanData !== '') {
-        //중복검사
-        const response = await axios.get(`${baseURL}/mold/selectone`, { params: { rfid: sliceData } });
 
+
+
+        //중복검사
+        //const response = await axios.get(`${baseURL}/mold/selectone`, { params: { rfid: sliceData } });
+        const urls = { moldSelectOne: `${baseURL}/mold/selectone` }
+        const response = await RequestHandler<AxiosResponse<any>>("get", urls.moldSelectOne, { rfid: sliceData });
         //setTimeout(() => {
         //등록된 테그에서 읽힌 Tag에대한것을 찾고 filter된것이 없을때 추가 
         runInAction(() => {
+
+          // //jjk, 22.05.24 - 연속 읽기 테스트 
+          // this.tagS = addTodo(this.tagS, sliceData, 0, response.data.moldName);
+          // this.tag = sliceData;
           const findTag = this.tagS.filter(x => x.value === sliceData);
           if (findTag.length === 0) {
             let data = response.data;
@@ -346,7 +376,11 @@ class RFIDStore {
   };
 
   ReceiverBarcodeData = async (barcodeData: string) => {
-    console.log('ReceiverBarcodeData', barcodeData);
+    console.log('ReceiverBarcodeData 길이', barcodeData.length);
+
+    //this.barcode = this.barcode.replace("\n", '');
+
+
     try {
       runInAction(() => {
         this.barcode = barcodeData;
@@ -389,23 +423,25 @@ class RFIDStore {
   }
 
   async RequestDeviceConfig(): Promise<typeof DeviceConfig> {
-    try {
-      const getDeviceConfig: any =
-        await RFIDConnectModule.getDeviceConfigSetting();
-
-      runInAction(() => {
-        if (getDeviceConfig === null || getDeviceConfig === 'CONFIG_NONE') {
-          this.deviceInfo = { ...DeviceConfig };
-        } else {
-          this.deviceInfo = getDeviceConfig;
-
-          console.log('RequestDeviceConfig', this.deviceInfo);
-        }
-      });
-    } catch (error) {
-      console.log('RequestDeviceConfig error:', error);
-    }
-    return await this.deviceInfo;
+    return new Promise(async (reslove, reject) => {
+      try {
+        const response: any = await RFIDConnectModule.getDeviceConfigSetting();
+        runInAction(() => {
+          if (response !== null && response !== undefined) {
+            this.deviceInfo = response;
+          }
+          else {
+            //기본 세팅으로 적용
+            this.deviceInfo = { ...DeviceConfig };
+          }
+          console.log('RequestDeviceConfig success:', this.deviceInfo);
+          reslove(this.deviceInfo)
+        });
+      } catch (error) {
+        console.log('RequestDeviceConfig error:', error);
+        reject(this.deviceInfo);
+      }
+    });
   }
 
   async RequestModeVerify() {
@@ -486,7 +522,7 @@ class RFIDStore {
     this.bluetoothInfo = sValue;
   }
 
-  setBarcodeDataClear() {
+  async setBarcodeDataClear() {
     console.log("바코드 데이터 초기화");
     this.barcode = { type: 'READ_FAIL', result: 'READ_FAIL' };
   }
